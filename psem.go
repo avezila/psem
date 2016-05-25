@@ -11,8 +11,11 @@ If the value of a semaphore is currently zero,
 then a Wait() operation will block until the value becomes greater than zero.
 
 Benchmark on my laptop thinkpad w520:
+
 BenchmarkPostWait-8        	 3000000	       416 ns/op
+
 BenchmarkPostWaitParallel-8	10000000	       175 ns/op
+
 */
 package psem
 
