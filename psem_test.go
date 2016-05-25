@@ -7,6 +7,36 @@ import (
 	"time"
 )
 
+func Example() {
+	sem, err := Open("/example", Creat|Excl, 0600, 1)
+	Unlink("/example")
+	defer sem.Close()
+	if err != nil {
+		fmt.Println(err)
+	}
+	sem.Wait() // Lock
+	fmt.Println("safe print")
+	sem.Post() // Unlock
+
+	sem.Wait()
+	val, _ := sem.Get()
+	fmt.Println("semaphore value", val) // 0
+
+	err = sem.TryWait()
+	if err == EAgain {
+		go func() {
+			time.Sleep(time.Millisecond)
+			sem.Post()
+		}()
+		err = sem.TimedWait(time.Millisecond * 5)
+		fmt.Println("no error now:", err)
+	}
+	// Output:
+	// safe print
+	// semaphore value 0
+	// no error now: <nil>
+}
+
 func TestSemaphore(t *testing.T) {
 	name := "/tmp_test"
 	sem, err := Open(name, Creat, 0600, 1)
@@ -106,34 +136,4 @@ func BenchmarkPostWaitParallel(b *testing.B) {
 			sem.Wait()
 		}
 	})
-}
-
-func ExampleSemaphore() {
-	sem, err := Open("/example", Creat|Excl, 0600, 1)
-	Unlink("/example")
-	defer sem.Close()
-	if err != nil {
-		fmt.Println(err)
-	}
-	sem.Wait() // Lock
-	fmt.Println("safe print")
-	sem.Post() // Unlock
-
-	sem.Wait()
-	val, _ := sem.Get()
-	fmt.Println("semaphore value", val) // 0
-
-	err = sem.TryWait()
-	if err == EAgain {
-		go func() {
-			time.Sleep(time.Second)
-			sem.Post()
-		}()
-		err = sem.TimedWait(time.Second * 5)
-		fmt.Println("no error now:", err)
-	}
-	// Output:
-	// safe print
-	// semaphore value 0
-	// no error now: <nil>
 }
