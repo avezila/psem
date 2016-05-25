@@ -1,5 +1,6 @@
 /*
 Package psem is a warp for POSIX named semaphore functions in C.
+
 http://linux.die.net/man/7/sem_overview
 
 POSIX semaphores allow processes and threads to synchronize their actions.
@@ -13,7 +14,6 @@ Benchmark on my laptop thinkpad w520:
 BenchmarkPostWait-8        	 3000000	       416 ns/op
 BenchmarkPostWaitParallel-8	10000000	       175 ns/op
 */
-
 package psem
 
 // #cgo CFLAGS: -lpthread

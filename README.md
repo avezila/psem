@@ -2,6 +2,19 @@
 --
     import "github.com/avezila/psem"
 
+Package psem is a warp for POSIX named semaphore functions in C.
+
+http://linux.die.net/man/7/sem_overview
+
+POSIX semaphores allow processes and threads to synchronize their actions. A
+semaphore is an integer whose value is never allowed to fall below zero. Two
+operations can be performed on semaphores: increment the semaphore value by one
+Post() and decrement the semaphore value by one Wait(). If the value of a
+semaphore is currently zero, then a Wait() operation will block until the value
+becomes greater than zero.
+
+Benchmark on my laptop thinkpad w520: BenchmarkPostWait-8 3000000 416 ns/op
+BenchmarkPostWaitParallel-8 10000000 175 ns/op
 
 ## Usage
 
