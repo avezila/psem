@@ -1,6 +1,7 @@
 package psem
 
 import (
+	"fmt"
 	"os"
 	"testing"
 	"time"
@@ -91,10 +92,48 @@ func TestSemaphore(t *testing.T) {
 func BenchmarkPostWait(b *testing.B) {
 	sem, _ := Open("/benchsem", Creat, 0600, 0)
 	Unlink("/benchsem")
+	for i := 0; i < b.N; i++ {
+		sem.Post()
+		sem.Wait()
+	}
+}
+func BenchmarkPostWaitParallel(b *testing.B) {
+	sem, _ := Open("/benchsem", Creat, 0600, 0)
+	Unlink("/benchsem")
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
 			sem.Post()
 			sem.Wait()
 		}
 	})
+}
+
+func ExampleSemaphore() {
+	sem, err := Open("/example", Creat|Excl, 0600, 1)
+	Unlink("/example")
+	defer sem.Close()
+	if err != nil {
+		fmt.Println(err)
+	}
+	sem.Wait() // Lock
+	fmt.Println("safe print")
+	sem.Post() // Unlock
+
+	sem.Wait()
+	val, _ := sem.Get()
+	fmt.Println("semaphore value", val) // 0
+
+	err = sem.TryWait()
+	if err == EAgain {
+		go func() {
+			time.Sleep(time.Second)
+			sem.Post()
+		}()
+		err = sem.TimedWait(time.Second * 5)
+		fmt.Println("no error now:", err)
+	}
+	// Output:
+	// safe print
+	// semaphore value 0
+	// no error now: <nil>
 }
